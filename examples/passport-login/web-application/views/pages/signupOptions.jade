@@ -1,0 +1,13 @@
+extends ../layouts/layout
+
+block content
+  .row
+    .col-md-12
+      h1 Other sign up options
+      ul.list-inline.list-unstyled
+        li
+          a.btn.btn-primary(href="/api/auth/thirdparty/facebook") Sign up with Facebook
+        li
+          a.btn.btn-primary(href="/api/auth/thirdparty/google") Sign up with Google
+        li
+          a.btn.btn-primary(href="/api/auth/thirdparty/twitter") Sign up with Twitter
