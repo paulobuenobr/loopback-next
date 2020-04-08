@@ -7,7 +7,6 @@ import {
   AuthenticationStrategy,
   UserIdentityService,
   asAuthStrategy,
-  AuthenticationBindings,
 } from '@loopback/authentication';
 import {StrategyAdapter} from '@loopback/authentication-passport';
 import {Profile} from 'passport';
@@ -17,10 +16,11 @@ import {UserProfile, securityId} from '@loopback/security';
 import {User} from '../models';
 import {UserServiceBindings} from '../services';
 import {inject, bind, extensions, Getter} from '@loopback/core';
-
-export namespace PassportAuthenticationBindings {
-  export const OAUTH2_STRATEGY = 'passport.authentication.oauth2.strategy';
-}
+import {
+  verifyFunctionFactory,
+  PassportAuthenticationBindings,
+  profileFunction,
+} from './types';
 
 @bind(asAuthStrategy)
 export class Oauth2AuthStrategy implements AuthenticationStrategy {
@@ -42,11 +42,19 @@ export class Oauth2AuthStrategy implements AuthenticationStrategy {
     public userService: UserIdentityService<Profile, User>,
     @inject('customOAuth2Options')
     public oauth2Options: StrategyOptions,
+    @inject('authentication.oauth2.profile.function', {optional: true})
+    public profileFn: profileFunction,
   ) {
     /**
      * Create a oauth2 strategy instance for a custom provider implementation
      */
-    this.passportstrategy = new Strategy(oauth2Options, this.verify.bind(this));
+    this.passportstrategy = new Strategy(
+      oauth2Options,
+      verifyFunctionFactory(userService).bind(this),
+    );
+    if (profileFn) {
+      this.passportstrategy.userProfile = profileFn;
+    }
     this.strategy = new StrategyAdapter(
       this.passportstrategy,
       this.name,

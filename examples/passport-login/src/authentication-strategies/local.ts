@@ -3,11 +3,7 @@
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 
-import {
-  AuthenticationStrategy,
-  asAuthStrategy,
-  AuthenticationBindings,
-} from '@loopback/authentication';
+import {AuthenticationStrategy, asAuthStrategy} from '@loopback/authentication';
 import {StrategyAdapter} from '@loopback/authentication-passport';
 import {Request, RedirectRoute} from '@loopback/rest';
 import {UserProfile, securityId} from '@loopback/security';
@@ -16,14 +12,8 @@ import {bind} from '@loopback/context';
 import {Strategy, IVerifyOptions} from 'passport-local';
 import {repository} from '@loopback/repository';
 import {UserRepository} from '../repositories';
-import {extensionFor} from '@loopback/core';
 
-@bind(
-  asAuthStrategy,
-  extensionFor(
-    AuthenticationBindings.AUTHENTICATION_STRATEGY_EXTENSION_POINT_NAME,
-  ),
-)
+@bind(asAuthStrategy)
 export class LocalAuthStrategy implements AuthenticationStrategy {
   name = 'local';
   passportstrategy: Strategy;
@@ -92,12 +82,22 @@ export class LocalAuthStrategy implements AuthenticationStrategy {
         ],
       })
       .then(user => {
-        if (!user) {
-          return done(new Error('User not found'));
+        if (!user || !user.length) {
+          /**
+           * Passport-local strategy fails authentication with third argument,
+           * the first argument assumes an error in the authenticating process.
+           */
+          return done(null, null, {
+            message: 'User Name / Password not matching',
+          });
         }
-        done(null, user);
+        done(null, user[0]);
       })
       .catch(err => {
+        /**
+         * Error occurred in authenticating process.
+         * Does not necessarily mean an unauthorized user.
+         */
         done(err);
       });
   }

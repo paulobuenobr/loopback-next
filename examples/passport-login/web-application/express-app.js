@@ -13,6 +13,14 @@ const session = require('client-sessions');
 const path = require('path');
 const bodyParser = require('body-parser');
 const app = (module.exports = express());
+const userLoginTemplate = require.resolve('./views/pages/login.jade');
+
+/**
+ * save a copy of the jade login template,
+ * to use in 'Post /users/signup' and 'POST /login_submit' routes.
+ * Reasons explained in the route handler.
+ */
+const loginTemplate = require('jade').compileFile(userLoginTemplate);
 
 /**
  * use jade as view engine
@@ -124,9 +132,18 @@ app.get('/signup', function (req, res, next) {
 /**
  * submit signup request
  */
-app.post('/signup', urlencodedParser, function (req, res, next) {
-  req.url = '/api/users/signup';
+app.post('/users/signup', urlencodedParser, function (req, res, next) {
+  req.url = '/api/signup';
   req.headers['accept'] = 'text/json';
+  res.on('User Exists', msg => {
+    res.status(401);
+    /**
+     * Sign Up events (like 'User Exists') are captured and redirected to the login page with error message.
+     * This helps focusing rendering concerns only in the express app. No need to add 'Jade' dependency to LB App.
+     */
+    res.write(loginTemplate({messages: msg}));
+    res.end();
+  });
   req.app.handle(req, res, next);
 });
 
@@ -136,5 +153,14 @@ app.post('/signup', urlencodedParser, function (req, res, next) {
 app.post('/login_submit', urlencodedParser, function (req, res, next) {
   req.url = '/api/login';
   req.headers['accept'] = 'text/json';
+  res.on('UnauthorizedError', msg => {
+    res.status(401);
+    /**
+     * authentication failures are captured and redirected to the login page with error message.
+     * This helps focusing rendering concerns only in the express app. No need to add 'Jade' dependency to LB App.
+     */
+    res.write(loginTemplate({messages: msg}));
+    res.end();
+  });
   req.app.handle(req, res, next);
 });

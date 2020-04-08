@@ -52,3 +52,9 @@ export class UserIdentity extends Entity {
     super(data);
   }
 }
+
+export interface UserIdentityRelations {
+  // describe navigational properties here
+}
+
+export type UserIdentityWithRelations = UserIdentity & UserIdentityRelations;

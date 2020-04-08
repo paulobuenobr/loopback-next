@@ -12,10 +12,10 @@ import {Entity, model, property} from '@loopback/repository';
 })
 export class UserCredentials extends Entity {
   @property({
-    type: 'number',
+    type: 'string',
     id: true,
   })
-  id: number;
+  id: string;
 
   @property({
     type: 'string',
@@ -25,11 +25,17 @@ export class UserCredentials extends Entity {
 
   @property({
     type: 'number',
-    required: true,
   })
-  userId: number;
+  userId?: number;
 
   constructor(data?: Partial<UserCredentials>) {
     super(data);
   }
 }
+
+export interface UserCredentialsRelations {
+  // describe navigational properties here
+}
+
+export type UserCredentialsWithRelations = UserCredentials &
+  UserCredentialsRelations;

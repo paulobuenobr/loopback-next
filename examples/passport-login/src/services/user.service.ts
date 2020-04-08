@@ -33,6 +33,7 @@ export class PassportUserIdentityService
     if (!profile.emails || !profile.emails.length) {
       throw new Error('email-id is required in returned profile to login');
     }
+
     const email = profile.emails[0].value;
 
     const users: User[] = await this.userRepository.find({
@@ -44,7 +45,7 @@ export class PassportUserIdentityService
     if (!users || !users.length) {
       user = await this.userRepository.create({
         email: email,
-        name: profile.displayName,
+        name: JSON.stringify(profile.name ?? profile.displayName),
         username: email,
       });
     } else {
@@ -67,7 +68,10 @@ export class PassportUserIdentityService
     try {
       profile = await this.userIdentityRepository.findById(userIdentity.id);
     } catch (err) {
-      console.log(err);
+      // no need to throw an error if entity is not found
+      if (!(err.code === 'ENTITY_NOT_FOUND')) {
+        throw err;
+      }
     }
 
     if (!profile) {

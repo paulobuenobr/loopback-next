@@ -7,7 +7,6 @@ import {
   asAuthStrategy,
   AuthenticationStrategy,
   UserIdentityService,
-  AuthenticationBindings,
 } from '@loopback/authentication';
 import {StrategyAdapter} from '@loopback/authentication-passport';
 import {Profile} from 'passport';
@@ -18,7 +17,8 @@ import {extensionFor} from '@loopback/core';
 import {securityId, UserProfile} from '@loopback/security';
 import {User} from '../models';
 import {Request, RedirectRoute} from '@loopback/rest';
-import {PassportAuthenticationBindings} from './oauth2';
+import {PassportAuthenticationBindings} from './types';
+import {verifyFunctionFactory} from './types';
 
 @bind(
   asAuthStrategy,
@@ -40,39 +40,13 @@ export class FaceBookOauth2Authorization implements AuthenticationStrategy {
   ) {
     this.passportstrategy = new Strategy(
       facebookOptions,
-      this.verify.bind(this),
+      verifyFunctionFactory(userService).bind(this),
     );
     this.strategy = new StrategyAdapter(
       this.passportstrategy,
       this.name,
       this.mapProfile.bind(this),
     );
-  }
-
-  /**
-   * verify function for the oauth2 strategy
-   *
-   * @param accessToken
-   * @param refreshToken
-   * @param profile
-   * @param done
-   */
-  verify(
-    accessToken: string,
-    refreshToken: string,
-    profile: Profile,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    done: (error: any, user?: any, info?: any) => void,
-  ) {
-    // look up a linked user for the profile
-    this.userService
-      .findOrCreateUser(profile)
-      .then((user: User) => {
-        done(null, user);
-      })
-      .catch((err: Error) => {
-        done(err);
-      });
   }
 
   /**

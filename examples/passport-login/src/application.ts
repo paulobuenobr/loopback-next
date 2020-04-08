@@ -8,11 +8,7 @@ import {RepositoryMixin} from '@loopback/repository';
 import {RestApplication} from '@loopback/rest';
 import {ServiceMixin} from '@loopback/service-proxy';
 import {MySequence} from './sequence';
-import {
-  AuthenticationComponent,
-  AuthenticationBindings,
-} from '@loopback/authentication';
-import {Oauth2Controller} from './controllers';
+import {AuthenticationComponent} from '@loopback/authentication';
 import {
   FaceBookOauth2Authorization,
   GoogleOauth2Authorization,
@@ -21,8 +17,9 @@ import {
 } from './authentication-strategies';
 import {PassportUserIdentityService, UserServiceBindings} from './services';
 import {ApplicationConfig, createBindingFromClass} from '@loopback/core';
+import {CrudRestComponent} from '@loopback/rest-crud';
 
-export class Oauth2LoginApplication extends BootMixin(
+export class OAuth2LoginApplication extends BootMixin(
   ServiceMixin(RepositoryMixin(RestApplication)),
 ) {
   constructor(options: ApplicationConfig = {}) {
@@ -33,8 +30,8 @@ export class Oauth2LoginApplication extends BootMixin(
     // Set up the custom sequence
     this.sequence(MySequence);
 
-    this.controller(Oauth2Controller);
     this.component(AuthenticationComponent);
+    this.component(CrudRestComponent);
 
     this.projectRoot = __dirname;
     // Customize @loopback/boot Booter Conventions here

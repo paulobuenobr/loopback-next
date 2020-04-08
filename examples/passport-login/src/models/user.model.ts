@@ -31,6 +31,7 @@ export class User extends Entity {
   @property({
     type: 'string',
     required: true,
+    index: {unique: true},
   })
   username: string;
 
@@ -52,7 +53,7 @@ export class User extends Entity {
   verificationToken?: string;
 
   @hasOne(() => UserCredentials)
-  userCredentials?: UserCredentials;
+  credentials?: UserCredentials;
 
   @hasMany(() => UserIdentity)
   profiles?: UserIdentity[];

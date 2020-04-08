@@ -7,7 +7,6 @@ import {
   asAuthStrategy,
   AuthenticationStrategy,
   UserIdentityService,
-  AuthenticationBindings,
 } from '@loopback/authentication';
 import {StrategyAdapter} from '@loopback/authentication-passport';
 import {Profile} from 'passport';
@@ -18,7 +17,8 @@ import {extensionFor} from '@loopback/core';
 import {securityId, UserProfile} from '@loopback/security';
 import {User} from '../models';
 import {Request, RedirectRoute} from '@loopback/rest';
-import {PassportAuthenticationBindings} from './oauth2';
+import {PassportAuthenticationBindings} from './types';
+import {verifyFunctionFactory} from './types';
 
 @bind(
   asAuthStrategy,
@@ -38,7 +38,10 @@ export class GoogleOauth2Authorization implements AuthenticationStrategy {
     @inject('googleOAuth2Options')
     public googleOptions: StrategyOptions,
   ) {
-    this.passportstrategy = new Strategy(googleOptions, this.verify.bind(this));
+    this.passportstrategy = new Strategy(
+      googleOptions,
+      verifyFunctionFactory(userService).bind(this),
+    );
     this.strategy = new StrategyAdapter(
       this.passportstrategy,
       this.name,

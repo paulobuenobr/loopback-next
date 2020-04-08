@@ -8,10 +8,12 @@ import {
   DefaultCrudRepository,
   HasManyRepositoryFactory,
   repository,
+  HasOneRepositoryFactory,
 } from '@loopback/repository';
 import {DbDataSource} from '../datasources';
-import {User, UserIdentity} from '../models';
+import {User, UserIdentity, UserCredentials} from '../models';
 import {UserIdentityRepository} from './user-identity.repository';
+import {UserCredentialsRepository} from './user-credentials.repository';
 
 export class UserRepository extends DefaultCrudRepository<
   User,
@@ -22,10 +24,17 @@ export class UserRepository extends DefaultCrudRepository<
     typeof User.prototype.id
   >;
 
+  public readonly credentials: HasOneRepositoryFactory<
+    UserCredentials,
+    typeof User.prototype.id
+  >;
+
   constructor(
     @inject('datasources.db') dataSource: DbDataSource,
     @repository.getter('UserIdentityRepository')
     protected profilesGetter: Getter<UserIdentityRepository>,
+    @repository.getter('UserCredentialsRepository')
+    protected credentialsGetter: Getter<UserCredentialsRepository>,
   ) {
     super(User, dataSource);
     this.profiles = this.createHasManyRepositoryFactoryFor(
@@ -33,5 +42,14 @@ export class UserRepository extends DefaultCrudRepository<
       profilesGetter,
     );
     this.registerInclusionResolver('profiles', this.profiles.inclusionResolver);
+
+    this.credentials = this.createHasOneRepositoryFactoryFor(
+      'credentials',
+      credentialsGetter,
+    );
+    this.registerInclusionResolver(
+      'credentials',
+      this.credentials.inclusionResolver,
+    );
   }
 }
