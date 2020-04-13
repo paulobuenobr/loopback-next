@@ -3,7 +3,8 @@
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 
-import {Entity, model, property} from '@loopback/repository';
+import {Entity, model, property, belongsTo} from '@loopback/repository';
+import {User} from './user.model';
 
 @model({
   settings: {
@@ -23,9 +24,7 @@ export class UserCredentials extends Entity {
   })
   password: string;
 
-  @property({
-    type: 'number',
-  })
+  @belongsTo(() => User)
   userId?: number;
 
   constructor(data?: Partial<UserCredentials>) {

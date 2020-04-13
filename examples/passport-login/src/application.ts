@@ -14,6 +14,7 @@ import {
   GoogleOauth2Authorization,
   Oauth2AuthStrategy,
   LocalAuthStrategy,
+  SessionStrategy,
 } from './authentication-strategies';
 import {PassportUserIdentityService, UserServiceBindings} from './services';
 import {ApplicationConfig, createBindingFromClass} from '@loopback/core';
@@ -53,5 +54,6 @@ export class OAuth2LoginApplication extends BootMixin(
     this.add(createBindingFromClass(FaceBookOauth2Authorization));
     this.add(createBindingFromClass(GoogleOauth2Authorization));
     this.add(createBindingFromClass(Oauth2AuthStrategy));
+    this.add(createBindingFromClass(SessionStrategy));
   }
 }

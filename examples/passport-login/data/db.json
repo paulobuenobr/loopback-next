@@ -1,15 +1,22 @@
 {
   "ids": {
-    "User": 6,
-    "UserIdentity": 104566694532673,
-    "UserCredentials": 3
+    "User": 9,
+    "UserIdentity": 104566694532676,
+    "UserCredentials": 4
   },
   "models": {
     "User": {
+      "6": "{\"name\":\"Test User\",\"username\":\"test@example.com\",\"email\":\"test@example.com\",\"id\":6}",
+      "7": "{\"name\":\"\\\"tinkerbell\\\"\",\"username\":\"usr1@lb.com\",\"email\":\"usr1@lb.com\",\"id\":7}",
+      "8": "{\"name\":\"{\\\"familyName\\\":\\\"User\\\",\\\"givenName\\\":\\\"Open\\\",\\\"middleName\\\":\\\"Graph Test\\\"}\",\"username\":\"dplojbdiuc_1585460374@tfbnw.net\",\"email\":\"dplojbdiuc_1585460374@tfbnw.net\",\"id\":8}"
     },
     "UserIdentity": {
+      "1001": "{\"id\":\"1001\",\"provider\":\"custom-oauth2\",\"profile\":{\"emails\":[{\"value\":\"usr1@lb.com\"}]},\"authScheme\":\"custom-oauth2\",\"created\":\"2020-04-13T22:01:23.670Z\",\"userId\":7}",
+      "1003": "{\"id\":\"1003\",\"provider\":\"custom-oauth2\",\"profile\":{\"emails\":[{\"value\":\"test@example.com\"}]},\"authScheme\":\"custom-oauth2\",\"created\":\"2020-04-13T22:01:23.556Z\",\"userId\":6}",
+      "104566694532668": "{\"id\":\"104566694532668\",\"provider\":\"facebook\",\"profile\":{\"emails\":[{\"value\":\"dplojbdiuc_1585460374@tfbnw.net\"}]},\"authScheme\":\"facebook\",\"created\":\"2020-04-13T23:18:46.875Z\",\"userId\":8}"
     },
     "UserCredentials": {
+      "test@example.com": "{\"id\":\"test@example.com\",\"password\":\"password\",\"userId\":6}"
     }
   }
 }

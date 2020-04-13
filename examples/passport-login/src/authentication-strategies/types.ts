@@ -14,14 +14,13 @@ export type profileFunction = (
   done: (err?: Error | null, profile?: any) => void,
 ) => void;
 
-export type VerifyFunction =
+export type VerifyFunction = (
+  accessToken: string,
+  refreshToken: string,
+  profile: Profile,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (
-    accessToken: string,
-    refreshToken: string,
-    profile: Profile,
-    done: (error: any, user?: any, info?: any) => void,
-  ) => void;
+  done: (error: any, user?: any, info?: any) => void,
+) => void;
 
 export namespace PassportAuthenticationBindings {
   export const OAUTH2_STRATEGY = 'passport.authentication.oauth2.strategy';

@@ -14,8 +14,8 @@ export {ExpressServer};
  * Prepare server config
  * @param oauth2Providers
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function serverConfig(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   oauth2Providers: any,
 ): Promise<ApplicationConfig> {
   const config = {
@@ -63,8 +63,8 @@ export async function setupServer(server: ExpressServer) {
  * Start this application
  * @param oauth2Providers
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function startApplication(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   oauth2Providers: any,
 ): Promise<ExpressServer> {
   const config = await serverConfig(oauth2Providers);
@@ -81,7 +81,7 @@ export async function main() {
   if (process.env.OAUTH_PROVIDERS_LOCATION) {
     oauth2Providers = require(process.env.OAUTH_PROVIDERS_LOCATION);
   } else {
-    oauth2Providers = require('./oauth2-providers');
+    oauth2Providers = require('../oauth2-providers');
   }
   const server: ExpressServer = await startApplication(oauth2Providers);
   console.log(`Server is running at ${server.url}`);

@@ -90,7 +90,7 @@ export class LocalAuthStrategy implements AuthenticationStrategy {
         if (!users || !users.length) {
           return done(null, null, {message: AUTH_FAILED_MESSAGE});
         }
-        let user = users[0];
+        const user = users[0];
         if (!user.credentials || user.credentials.password !== password) {
           return done(null, null, {message: AUTH_FAILED_MESSAGE});
         }
