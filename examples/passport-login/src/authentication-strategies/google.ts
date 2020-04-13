@@ -45,7 +45,7 @@ export class GoogleOauth2Authorization implements AuthenticationStrategy {
     this.strategy = new StrategyAdapter(
       this.passportstrategy,
       this.name,
-      this.mapProfile,
+      this.mapProfile.bind(this),
     );
   }
 

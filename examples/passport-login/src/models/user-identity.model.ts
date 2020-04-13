@@ -9,7 +9,7 @@ import {Entity, model, property} from '@loopback/repository';
 export class UserIdentity extends Entity {
   @property({
     type: 'string',
-    id: 1,
+    id: true,
   })
   id: string;
 

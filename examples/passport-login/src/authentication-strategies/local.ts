@@ -77,21 +77,25 @@ export class LocalAuthStrategy implements AuthenticationStrategy {
         },
         include: [
           {
-            relation: 'profiles',
+            relation: 'credentials',
           },
         ],
       })
-      .then(user => {
-        if (!user || !user.length) {
-          /**
-           * Passport-local strategy fails authentication with third argument,
-           * the first argument assumes an error in the authenticating process.
-           */
-          return done(null, null, {
-            message: 'User Name / Password not matching',
-          });
+      .then((users: User[]) => {
+        const AUTH_FAILED_MESSAGE = 'User Name / Password not matching';
+        /**
+         * Passport-local strategy fails authentication with the third argument,
+         * the first argument assumes an error in the authenticating process.
+         */
+        if (!users || !users.length) {
+          return done(null, null, {message: AUTH_FAILED_MESSAGE});
         }
-        done(null, user[0]);
+        let user = users[0];
+        if (!user.credentials || user.credentials.password !== password) {
+          return done(null, null, {message: AUTH_FAILED_MESSAGE});
+        }
+        // Authentication passed, return user profile
+        done(null, user);
       })
       .catch(err => {
         /**

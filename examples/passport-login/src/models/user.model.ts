@@ -11,7 +11,7 @@ import {UserIdentity} from './user-identity.model';
 export class User extends Entity {
   @property({
     type: 'number',
-    id: 1,
+    id: true,
     generated: true,
   })
   id: number;
