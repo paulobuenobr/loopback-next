@@ -92,5 +92,6 @@
     "tutorial",
     "passport",
     "authentication"
-  ]
+  ],
+  "copyright.owner": "IBM Corp."
 }
