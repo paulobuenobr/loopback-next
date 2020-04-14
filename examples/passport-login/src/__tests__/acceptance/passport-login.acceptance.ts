@@ -22,11 +22,11 @@ const oauth2Providers = require(path.resolve(
  *         User is able to create a local user profile by signing in with
  *         an email-id and password, if the email id is not registered already.
  *
- *    Scenario 2. Link an external profile with a local user
+ *    Scenario 2: Link an external profile with a local user
  *         After the user signs up, user is able to link local account with an
  *         external profile in a social app, if the email id is same.
  *
- *    Scenario 3. Sign Up (create a new user) via an external profile
+ *    Scenario 3: Sign Up (create a new user) via an external profile
  *         When a user attempts to sign up with an external profile, and the email-id
  *         in the profile is not registered locally, a new local account is created
  */
@@ -56,7 +56,9 @@ describe('example-passport-login acceptance test', () => {
     let createdUser: User;
 
     /**
-     *  Scenario 1. Signing up as a NEW user
+     ***************************************
+     *  Scenario 1: Signing up as a NEW user
+     ***************************************
      *    Test case 1: sign up as a new user locally, provide email id and password
      *    Test case 2: login as the new user with email id
      *    Test case 3: logout
@@ -102,6 +104,10 @@ describe('example-passport-login acceptance test', () => {
         await client.get('/auth/account').set('Cookie', [Cookie]).expect(200);
       });
 
+      it('able to access /api/whoAmI API endpoint with user session', async () => {
+        await client.get('/api/whoAmI').set('Cookie', [Cookie]).expect(200);
+      });
+
       it('access to account profile page is denied after log out', async () => {
         const response = await client
           .get('/logout')
@@ -118,6 +124,10 @@ describe('example-passport-login acceptance test', () => {
         await client.get('/auth/account').set('Cookie', [Cookie]).expect(401);
       });
 
+      it('access to /api/whoAmI API endpoint denied after logout', async () => {
+        await client.get('/api/whoAmI').set('Cookie', [Cookie]).expect(401);
+      });
+
       it('check if user was registered', async () => {
         const filter = 'filter={"where":{"email": "test@example.com"}}';
         const response = await supertest('')
@@ -131,12 +141,14 @@ describe('example-passport-login acceptance test', () => {
     });
 
     /**
-     *  Scenario 2. Link an external profile with a local user
+     *********************************************************
+     *  Scenario 2: Link an external profile with a local user
+     *********************************************************
      *    Test case 1: login via a social app profile having same email id as local user
      *    Test case 2: check if external profile is linked to local user
      *    Test case 3: logout
      */
-    context('Scenario 2. Link an external profile with a local user', () => {
+    context('Scenario 2: Link an external profile with a local user', () => {
       let oauthProviderUrl: string;
       let providerLoginUrl: string;
       let loginPageParams: string;
@@ -207,6 +219,10 @@ describe('example-passport-login acceptance test', () => {
         await client.get('/auth/account').set('Cookie', [Cookie]).expect(200);
       });
 
+      it('able to access /api/whoAmI API endpoint with user session', async () => {
+        await client.get('/api/whoAmI').set('Cookie', [Cookie]).expect(200);
+      });
+
       it('access to account profile page is denied after log out', async () => {
         const response = await client
           .get('/logout')
@@ -221,6 +237,10 @@ describe('example-passport-login acceptance test', () => {
         }
         expect(Cookie).to.containEql('session');
         await client.get('/auth/account').set('Cookie', [Cookie]).expect(401);
+      });
+
+      it('access to /api/whoAmI API endpoint denied after logout', async () => {
+        await client.get('/api/whoAmI').set('Cookie', [Cookie]).expect(401);
       });
 
       it('check if profile is linked to existing user', async () => {
@@ -239,13 +259,15 @@ describe('example-passport-login acceptance test', () => {
     });
 
     /**
-     *  Scenario 3. Sign Up (create a new user) via an external profile
+     ******************************************************************
+     *  Scenario 3: Sign Up (create a new user) via an external profile
+     ******************************************************************
      *    Test case 1: login via a social app profile having an email id not in local user registry
      *    Test case 2: check if new user is created for external profile
      *    Test case 3: logout
      */
     context(
-      'Scenario 3. Sign Up (create a new user) via an external profile',
+      'Scenario 3: Sign Up (create a new user) via an external profile',
       () => {
         let oauthProviderUrl: string;
         let providerLoginUrl: string;
@@ -323,6 +345,10 @@ describe('example-passport-login acceptance test', () => {
           await client.get('/auth/account').set('Cookie', [Cookie]).expect(200);
         });
 
+        it('able to access /api/whoAmI API endpoint with user session', async () => {
+          await client.get('/api/whoAmI').set('Cookie', [Cookie]).expect(200);
+        });
+
         it('access to account profile page is denied after log out', async () => {
           const response = await client
             .get('/logout')
@@ -337,6 +363,10 @@ describe('example-passport-login acceptance test', () => {
           }
           expect(Cookie).to.containEql('session');
           await client.get('/auth/account').set('Cookie', [Cookie]).expect(401);
+        });
+
+        it('access to /api/whoAmI API endpoint denied after logout', async () => {
+          await client.get('/api/whoAmI').set('Cookie', [Cookie]).expect(401);
         });
 
         it('check if a new user was registered', async () => {

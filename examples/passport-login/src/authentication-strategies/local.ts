@@ -77,6 +77,9 @@ export class LocalAuthStrategy implements AuthenticationStrategy {
         },
         include: [
           {
+            relation: 'profiles',
+          },
+          {
             relation: 'credentials',
           },
         ],

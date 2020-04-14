@@ -24,3 +24,15 @@ block content
       if messages
         p
           span(style="color:red")= messages
+
+block content
+  .row
+    .col-md-12
+      h1 Other Login Options
+      ul.list-inline.list-unstyled
+        li
+          a.btn.btn-primary(href="/api/auth/thirdparty/facebook") Login with Facebook
+        li
+          a.btn.btn-primary(href="/api/auth/thirdparty/google") Login with Google
+        li
+          a.btn.btn-primary(href="/api/auth/thirdparty/twitter") Login with Twitter

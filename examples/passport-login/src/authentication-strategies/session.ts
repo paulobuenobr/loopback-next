@@ -24,17 +24,15 @@ export class SessionStrategy implements AuthenticationStrategy {
    * authenticate a request
    * @param request
    */
-  async authenticate(request: RequestWithSession): Promise<UserProfile | RedirectRoute | undefined> {
+  async authenticate(
+    request: RequestWithSession,
+  ): Promise<UserProfile | RedirectRoute | undefined> {
     if (!request.user) {
-      throw new HttpErrors.Unauthorized(
-        `Invalid Session`,
-      );
+      throw new HttpErrors.Unauthorized(`Invalid Session`);
     }
-    let user: User = request.user as User;
+    const user: User = request.user as User;
     if (!user.email || !user.id) {
-      throw new HttpErrors.Unauthorized(
-        `Invalid user profile`,
-      );
+      throw new HttpErrors.Unauthorized(`Invalid user profile`);
     }
     const users: User[] = await this.userRepository.find({
       where: {
@@ -42,9 +40,7 @@ export class SessionStrategy implements AuthenticationStrategy {
       },
     });
     if (!users || !users.length) {
-      throw new HttpErrors.Unauthorized(
-        `User not registered`,
-      );
+      throw new HttpErrors.Unauthorized(`User not registered`);
     }
     return this.mapProfile(request.user as User);
   }
