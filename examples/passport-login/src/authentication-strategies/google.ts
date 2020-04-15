@@ -50,32 +50,6 @@ export class GoogleOauth2Authorization implements AuthenticationStrategy {
   }
 
   /**
-   * verify function for the oauth2 strategy
-   *
-   * @param accessToken
-   * @param refreshToken
-   * @param profile
-   * @param done
-   */
-  verify(
-    accessToken: string,
-    refreshToken: string,
-    profile: Profile,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    done: (error: any, user?: any, info?: any) => void,
-  ) {
-    // look up a linked user for the profile
-    this.userService
-      .findOrCreateUser(profile)
-      .then((user: User) => {
-        done(null, user);
-      })
-      .catch((err: Error) => {
-        done(err);
-      });
-  }
-
-  /**
    * authenticate a request
    * @param request
    */

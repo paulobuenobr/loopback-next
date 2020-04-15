@@ -11,10 +11,11 @@ import {
   Response,
   RestBindings,
   RequestWithSession,
+  get,
 } from '@loopback/rest';
 import {UserRepository} from '../repositories';
 import {repository} from '@loopback/repository';
-import {SecurityBindings, UserProfile} from '@loopback/security';
+import {SecurityBindings, UserProfile, securityId} from '@loopback/security';
 import {authenticate} from '@loopback/authentication';
 import {UserCredentialsRepository} from '../repositories/user-credentials.repository';
 import {UserIdentityRepository} from '../repositories/user-identity.repository';
@@ -129,5 +130,23 @@ export class UserLoginController {
     await this.userCredentialsRepository.deleteAll();
     await this.userIdentityRepository.deleteAll();
     await this.userRepository.deleteAll();
+  }
+
+  @authenticate('basic')
+  @get('/profiles')
+  async getExternalProfiles(
+    @inject(SecurityBindings.USER) profile: UserProfile,
+  ) {
+    const user = await this.userRepository.findById(
+      parseInt(profile[securityId]),
+      {
+        include: [
+          {
+            relation: 'profiles',
+          },
+        ],
+      },
+    );
+    return user.profiles;
   }
 }

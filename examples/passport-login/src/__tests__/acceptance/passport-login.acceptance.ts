@@ -6,7 +6,7 @@
 import {Client, supertest, expect} from '@loopback/testlab';
 import {MockTestOauth2SocialApp} from '@loopback/authentication-passport';
 import {ExpressServer} from '../../server';
-import {User} from '../../models';
+import {User, UserIdentity} from '../../models';
 import {startApplication} from '../../';
 import * as url from 'url';
 import qs from 'qs';
@@ -65,7 +65,6 @@ describe('example-passport-login acceptance test', () => {
 
   describe('User login scenarios', () => {
     let Cookie: string;
-    let createdUser: User;
 
     /**
      ***************************************
@@ -148,7 +147,20 @@ describe('example-passport-login acceptance test', () => {
         const users = response.body as User[];
         expect(users.length).to.eql(1);
         expect(users[0].email).to.eql('test@example.com');
-        createdUser = users[0];
+      });
+
+      it('able to invoke api endpoints with basic auth', async () => {
+        await supertest('')
+          .get('http://localhost:3000/api/profiles')
+          .auth('test@example.com', 'password', {type: 'basic'})
+          .expect(204);
+      });
+
+      it('basic auth fails for incorrect password', async () => {
+        await supertest('')
+          .get('http://localhost:3000/api/profiles')
+          .auth('test@example.com', 'incorrect-password', {type: 'basic'})
+          .expect(401);
       });
     });
 
@@ -256,13 +268,11 @@ describe('example-passport-login acceptance test', () => {
       });
 
       it('check if profile is linked to existing user', async () => {
-        const filter = 'filter={"include":[{"relation": "profiles"}]}';
         const response = await supertest('')
-          .get('http://localhost:3000/api/users/' + createdUser.id)
-          .query(filter);
-        const user = response.body as User;
-        expect(user.profiles?.length).to.eql(1);
-        const profiles = user.profiles ?? [];
+          .get('http://localhost:3000/api/profiles')
+          .auth('test@example.com', 'password', {type: 'basic'});
+        const profiles = response.body as UserIdentity[];
+        expect(profiles?.length).to.eql(1);
         expect(profiles[0].profile).to.eql({
           emails: [{value: 'test@example.com'}],
         });
