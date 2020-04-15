@@ -1,20 +1,12 @@
 {
   "ids": {
-    "User": 3,
-    "UserIdentity": 1005,
-    "UserCredentials": 2
+    "User": 8,
+    "UserIdentity": 1009,
+    "UserCredentials": 4
   },
   "models": {
-    "User": {
-      "1": "{\"name\":\"Test User\",\"username\":\"test@example.com\",\"email\":\"test@example.com\",\"id\":1}",
-      "2": "{\"name\":\"\\\"tinkerbell\\\"\",\"username\":\"usr1@lb.com\",\"email\":\"usr1@lb.com\",\"id\":2}"
-    },
-    "UserIdentity": {
-      "1001": "{\"id\":\"1001\",\"provider\":\"custom-oauth2\",\"profile\":{\"emails\":[{\"value\":\"usr1@lb.com\"}]},\"authScheme\":\"custom-oauth2\",\"created\":\"2020-04-14T18:55:47.991Z\",\"userId\":2}",
-      "1003": "{\"id\":\"1003\",\"provider\":\"custom-oauth2\",\"profile\":{\"emails\":[{\"value\":\"test@example.com\"}]},\"authScheme\":\"custom-oauth2\",\"created\":\"2020-04-14T18:55:47.412Z\",\"userId\":1}"
-    },
-    "UserCredentials": {
-      "test@example.com": "{\"id\":\"test@example.com\",\"password\":\"password\",\"userId\":1}"
-    }
+    "User": {},
+    "UserIdentity": {},
+    "UserCredentials": {}
   }
 }

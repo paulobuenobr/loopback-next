@@ -21,12 +21,7 @@ block content
             input.form-control(type='password', name='password', placeholder='Password')
           button.btn.btn-default(type='submit') Submit
         br
-      if messages
-        p
-          span(style="color:red")= messages
-
-block content
-  .row
+        .row
     .col-md-12
       h1 Other Login Options
       ul.list-inline.list-unstyled
@@ -36,3 +31,6 @@ block content
           a.btn.btn-primary(href="/api/auth/thirdparty/google") Login with Google
         li
           a.btn.btn-primary(href="/api/auth/thirdparty/twitter") Login with Twitter
+      if messages
+        p
+          span(style="color:red")= messages

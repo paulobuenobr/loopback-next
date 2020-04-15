@@ -6,6 +6,7 @@
 import {inject} from '@loopback/context';
 import {
   post,
+  del,
   requestBody,
   Response,
   RestBindings,
@@ -16,6 +17,7 @@ import {repository} from '@loopback/repository';
 import {SecurityBindings, UserProfile} from '@loopback/security';
 import {authenticate} from '@loopback/authentication';
 import {UserCredentialsRepository} from '../repositories/user-credentials.repository';
+import {UserIdentityRepository} from '../repositories/user-identity.repository';
 
 export type Credentials = {
   email: string;
@@ -44,6 +46,8 @@ export class UserLoginController {
     public userRepository: UserRepository,
     @repository(UserCredentialsRepository)
     public userCredentialsRepository: UserCredentialsRepository,
+    @repository(UserIdentityRepository)
+    public userIdentityRepository: UserIdentityRepository,
   ) {}
 
   @post('/signup')
@@ -114,5 +118,16 @@ export class UserLoginController {
     request.session.user = profile;
     response.redirect('/auth/account');
     return response;
+  }
+
+  /**
+   * TODO: enable roles and authorization, add admin role authorization to this endpoint
+   */
+  @authenticate('basic')
+  @del('/clear')
+  async clear() {
+    await this.userCredentialsRepository.deleteAll();
+    await this.userIdentityRepository.deleteAll();
+    await this.userRepository.deleteAll();
   }
 }

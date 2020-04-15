@@ -47,6 +47,18 @@ describe('example-passport-login acceptance test', () => {
     client = supertest('http://127.0.0.1:3000');
   });
 
+  before(async function clearTestData() {
+    await supertest('')
+      .delete('http://localhost:3000/api/clear')
+      .auth('admin', 'password', {type: 'basic'});
+  });
+
+  after(async function clearTestData() {
+    await supertest('')
+      .delete('http://localhost:3000/api/clear')
+      .auth('admin', 'password', {type: 'basic'});
+  });
+
   after(async function closeApplication() {
     await server.stop();
   });
@@ -63,7 +75,7 @@ describe('example-passport-login acceptance test', () => {
      *    Test case 2: login as the new user with email id
      *    Test case 3: logout
      */
-    context('Scenario 1. Signing up as a NEW user', () => {
+    context('Scenario 1: Signing up as a NEW user', () => {
       /**
        * create a local account in the loopback app with the following profile
        *     username: test@example.com
