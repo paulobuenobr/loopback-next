@@ -9,6 +9,7 @@ import http from 'http';
 import {AddressInfo} from 'net';
 import pEvent from 'p-event';
 import {OAuth2LoginApplication} from './application';
+import * as path from 'path';
 
 /**
  * An express server with multiple apps
@@ -41,6 +42,9 @@ export class ExpressServer {
     this.lbApp.bind('facebookOAuth2Options').to(options.facebookOptions);
     this.lbApp.bind('googleOAuth2Options').to(options.googleOptions);
     this.lbApp.bind('customOAuth2Options').to(options.oauth2Options);
+
+    // Serve static files in the public folder
+    this.webApp.use(express.static(path.join(__dirname, '../public')));
 
     /**
      * Mount the LB4 app router in /api path
