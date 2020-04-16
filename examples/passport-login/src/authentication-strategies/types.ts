@@ -35,7 +35,7 @@ export const oauth2ProfileFunction: profileFunction = (
     .get('http://localhost:9000/verify?access_token=' + accessToken, {
       headers: {Authorization: accessToken},
     })
-    .then(response => {
+    .then((response) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const profile: any = response.data;
       profile.id = profile.userId;
@@ -43,7 +43,7 @@ export const oauth2ProfileFunction: profileFunction = (
       profile.provider = 'custom-oauth2';
       done(null, profile);
     })
-    .catch(err => {
+    .catch((err) => {
       done(err);
     });
 };

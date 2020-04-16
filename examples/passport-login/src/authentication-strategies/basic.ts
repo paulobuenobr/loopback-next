@@ -103,7 +103,7 @@ export class BasicStrategy implements AuthenticationStrategy {
         // Authentication passed, return user profile
         done(null, user);
       })
-      .catch(err => {
+      .catch((err) => {
         /**
          * Error occurred in authenticating process.
          * Does not necessarily mean an unauthorized user.
