@@ -14,9 +14,19 @@ import {
   filterByKey,
   filterByTag,
   inject,
+  isBindingAddress,
+  Provider,
   Subscription,
 } from '@loopback/context';
 import {Application, CoreBindings, Server} from '@loopback/core';
+import {
+  ExpressMiddlewareFactory,
+  ExpressRequestHandler,
+  Middleware,
+  MiddlewareBindingOptions,
+  registerExpressMiddleware,
+  registerMiddleware,
+} from '@loopback/express';
 import {HttpServer, HttpServerOptions} from '@loopback/http-server';
 import {
   getControllerSpec,
@@ -49,7 +59,6 @@ import {
   ControllerRoute,
   createControllerFactoryForBinding,
   createRoutesForController,
-  ExpressRequestHandler,
   ExternalExpressRoutes,
   RedirectRoute,
   RestRouterOptions,
@@ -60,16 +69,7 @@ import {
 } from './router';
 import {assignRouterSpec} from './router/router-spec';
 import {DefaultSequence, SequenceFunction, SequenceHandler} from './sequence';
-import {
-  FindRoute,
-  InvokeMethod,
-  ParseParams,
-  Reject,
-  Request,
-  RequestBodyParserOptions,
-  Response,
-  Send,
-} from './types';
+import {Request, RequestBodyParserOptions, Response} from './types';
 
 const debug = debugFactory('loopback:rest:server');
 
@@ -251,7 +251,11 @@ export class RestServer extends Context implements Server, HttpServerLike {
 
     // Allow CORS support for all endpoints so that users
     // can test with online SwaggerUI instance
-    this._expressApp.use(cors(this.config.cors));
+    this.expressMiddleware(cors, this.config.cors, {
+      injectConfiguration: false,
+      key: 'middleware.cors',
+      group: 'cors',
+    });
 
     // Set up endpoints for OpenAPI spec/ui
     this._setupOpenApiSpecEndpoints();
@@ -311,49 +315,52 @@ export class RestServer extends Context implements Server, HttpServerLike {
    */
   protected _setupOpenApiSpecEndpoints() {
     if (this.config.openApiSpec.disabled) return;
+    const router = express.Router();
     const mapping = this.config.openApiSpec.endpointMapping!;
     // Serving OpenAPI spec
     for (const p in mapping) {
-      this.addOpenApiSpecEndpoint(p, mapping[p]);
+      this.addOpenApiSpecEndpoint(p, mapping[p], router);
     }
-
     const explorerPaths = ['/swagger-ui', '/explorer'];
-    this._expressApp.get(explorerPaths, (req, res, next) =>
+    router.get(explorerPaths, (req, res, next) =>
       this._redirectToSwaggerUI(req, res, next),
     );
+    this.expressMiddleware('middleware.apiSpec.defaults', router, {
+      group: 'apiSpec',
+    });
   }
 
   /**
    * Add a new non-controller endpoint hosting a form of the OpenAPI spec.
    *
    * @param path Path at which to host the copy of the OpenAPI
-   * @param form Form that should be renedered from that path
+   * @param form Form that should be rendered from that path
    */
-  addOpenApiSpecEndpoint(path: string, form: OpenApiSpecForm) {
-    if (this._expressApp) {
-      // if the app is already started, try to hot-add it
-      // this only actually "works" mid-startup, once this._handleHttpRequest
-      // has been added to express, adding any later routes won't work
-
-      // NOTE(bajtos) Regular routes are handled through Sequence.
-      // IMO, this built-in endpoint should not run through a Sequence,
-      // because it's not part of the application API itself.
-      // E.g. if the app implements access/audit logs, I don't want
-      // this endpoint to trigger a log entry. If the server implements
-      // content-negotiation to support XML clients, I don't want the OpenAPI
-      // spec to be converted into an XML response.
-      this._expressApp.get(path, (req, res) =>
-        this._serveOpenApiSpec(req, res, form),
-      );
-    } else {
-      // if the app is not started, add the mapping to the config
-      const mapping = this.config.openApiSpec.endpointMapping!;
-      if (path in mapping) {
+  addOpenApiSpecEndpoint(
+    path: string,
+    form: OpenApiSpecForm,
+    router?: express.Router,
+  ) {
+    if (router == null) {
+      const key = `middleware.apiSpec.${path}.${form}`;
+      if (this.contains(key)) {
         throw new Error(
           `The path ${path} is already configured for OpenApi hosting`,
         );
       }
-      mapping[path] = form;
+      const newRouter = express.Router();
+      newRouter.get(path, (req, res) => this._serveOpenApiSpec(req, res, form));
+      this.expressMiddleware(
+        () => newRouter,
+        {},
+        {
+          injectConfiguration: false,
+          key: `middleware.apiSpec.${path}.${form}`,
+          group: 'apiSpec',
+        },
+      );
+    } else {
+      router.get(path, (req, res) => this._serveOpenApiSpec(req, res, form));
     }
   }
 
@@ -571,6 +578,106 @@ export class RestServer extends Context implements Server, HttpServerLike {
     return this.bind('controllers.' + controllerCtor.name).toClass(
       controllerCtor,
     );
+  }
+
+  /**
+   * Bind an Express middleware to this server context
+   *
+   * @example
+   * ```ts
+   * import myExpressMiddlewareFactory from 'my-express-middleware';
+   * const myExpressMiddlewareConfig= {};
+   * const myExpressMiddleware = myExpressMiddlewareFactory(myExpressMiddlewareConfig);
+   * server.expressMiddleware('middleware.express.my', myExpressMiddleware);
+   * ```
+   * @param key - Middleware binding key
+   * @param middleware - Express middleware handler function
+   *
+   */
+  expressMiddleware(
+    key: BindingAddress,
+    middleware: ExpressRequestHandler,
+    options?: MiddlewareBindingOptions,
+  ): Binding<Middleware>;
+
+  /**
+   * Bind an Express middleware to this server context
+   *
+   * @example
+   * ```ts
+   * import myExpressMiddlewareFactory from 'my-express-middleware';
+   * const myExpressMiddlewareConfig= {};
+   * server.expressMiddleware(myExpressMiddlewareFactory, myExpressMiddlewareConfig);
+   * ```
+   * @param middlewareFactory - Middleware module name or factory function
+   * @param middlewareConfig - Middleware config
+   * @param options - Options for registration
+   *
+   * @typeParam CFG - Configuration type
+   */
+  expressMiddleware<CFG>(
+    middlewareFactory: ExpressMiddlewareFactory<CFG>,
+    middlewareConfig?: CFG,
+    options?: MiddlewareBindingOptions,
+  ): Binding<Middleware>;
+
+  /**
+   * @internal
+   *
+   * This signature is only used by RestApplication for delegation
+   */
+  expressMiddleware<CFG>(
+    factoryOrKey: ExpressMiddlewareFactory<CFG> | BindingAddress<Middleware>,
+    configOrHandler: CFG | ExpressRequestHandler,
+    options?: MiddlewareBindingOptions,
+  ): Binding<Middleware>;
+
+  /**
+   * @internal
+   * Implementation of `expressMiddleware`
+   */
+  expressMiddleware<CFG>(
+    factoryOrKey: ExpressMiddlewareFactory<CFG> | BindingAddress<Middleware>,
+    configOrHandler: CFG | ExpressRequestHandler,
+    options: MiddlewareBindingOptions = {},
+  ): Binding<Middleware> {
+    const key = factoryOrKey as BindingAddress<Middleware>;
+    if (isBindingAddress(key)) {
+      const handler = configOrHandler as ExpressRequestHandler;
+      return registerExpressMiddleware<CFG>(this, () => handler, undefined, {
+        ...options,
+        key,
+        injectConfiguration: false,
+      });
+    } else {
+      return registerExpressMiddleware(
+        this,
+        factoryOrKey as ExpressMiddlewareFactory<CFG>,
+        configOrHandler as CFG,
+        options,
+      );
+    }
+  }
+
+  /**
+   * Register a middleware function or provider class
+   *
+   * @example
+   * ```ts
+   * const log: Middleware = async (requestCtx, next) {
+   *   // ...
+   * }
+   * server.middleware(log);
+   * ```
+   *
+   * @param middleware - Middleware function or provider class
+   * @param options - Middleware binding options
+   */
+  middleware(
+    middleware: Middleware | Constructor<Provider<Middleware>>,
+    options: MiddlewareBindingOptions = {},
+  ): Binding<Middleware> {
+    return registerMiddleware(this, middleware, options);
   }
 
   /**
@@ -883,21 +990,8 @@ export class RestServer extends Context implements Server, HttpServerLike {
    */
   public handler(handlerFn: SequenceFunction) {
     class SequenceFromFunction extends DefaultSequence {
-      // NOTE(bajtos) Unfortunately, we have to duplicate the constructor
-      // in order for our DI/IoC framework to inject constructor arguments
-      constructor(
-        @inject(SequenceActions.FIND_ROUTE) protected findRoute: FindRoute,
-        @inject(SequenceActions.PARSE_PARAMS)
-        protected parseParams: ParseParams,
-        @inject(SequenceActions.INVOKE_METHOD) protected invoke: InvokeMethod,
-        @inject(SequenceActions.SEND) public send: Send,
-        @inject(SequenceActions.REJECT) public reject: Reject,
-      ) {
-        super(findRoute, parseParams, invoke, send, reject);
-      }
-
       async handle(context: RequestContext): Promise<void> {
-        await Promise.resolve(handlerFn(context, this));
+        return handlerFn(context, this);
       }
     }
 
