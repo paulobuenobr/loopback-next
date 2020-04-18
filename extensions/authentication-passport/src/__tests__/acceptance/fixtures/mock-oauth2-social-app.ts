@@ -131,11 +131,17 @@ async function createJwt(
   const jti = Math.floor(Math.random() * Math.floor(1000));
   const token = jwt.sign(
     {
+      id: user.id,
       userId: user.id,
       jti: jti,
       sub: user.id,
-      name: '' + user.firstName + user.lastName,
-      email: {value: user.email},
+      name: '' + user.firstName + ' ' + user.lastName,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      last_name: user.lastName,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      first_name: user.firstName,
+      email: user.email,
+      username: user.email,
       iss: 'sample oauth provider',
       exp: Math.floor(Date.now() / 1000) + 5 * 1000,
       iat: Math.floor(Date.now() / 1000),

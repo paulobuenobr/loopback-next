@@ -43,9 +43,13 @@ export class PassportUserIdentityService
     });
     let user: User;
     if (!users || !users.length) {
+      const name =
+        profile.name && profile.name.givenName
+          ? profile.name.givenName + ' ' + profile.name.familyName
+          : profile.displayName;
       user = await this.userRepository.create({
         email: email,
-        name: JSON.stringify(profile.name ?? profile.displayName),
+        name: name || JSON.stringify(profile.name),
         username: email,
       });
     } else {
@@ -84,6 +88,7 @@ export class PassportUserIdentityService
         created: new Date(),
       });
     }
+    if (!userId) console.log('user id is empty');
     return this.userRepository.findById(parseInt(userId), {
       include: [
         {

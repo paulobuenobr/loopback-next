@@ -12,7 +12,7 @@ import {StrategyAdapter} from '@loopback/authentication-passport';
 import {Profile} from 'passport';
 import {Strategy, StrategyOptions} from 'passport-oauth2';
 import {Request, RedirectRoute} from '@loopback/rest';
-import {UserProfile, securityId} from '@loopback/security';
+import {UserProfile} from '@loopback/security';
 import {User} from '../models';
 import {UserServiceBindings} from '../services';
 import {inject, bind, extensions, Getter} from '@loopback/core';
@@ -20,6 +20,7 @@ import {
   verifyFunctionFactory,
   PassportAuthenticationBindings,
   profileFunction,
+  mapProfile,
 } from './types';
 
 @bind(asAuthStrategy)
@@ -58,7 +59,7 @@ export class Oauth2AuthStrategy implements AuthenticationStrategy {
     this.strategy = new StrategyAdapter(
       this.passportstrategy,
       this.name,
-      this.mapProfile.bind(this),
+      mapProfile.bind(this),
     );
   }
 
@@ -87,19 +88,5 @@ export class Oauth2AuthStrategy implements AuthenticationStrategy {
        */
       return this.strategy.authenticate(request);
     }
-  }
-
-  /**
-   * map passport profile to user profile
-   * @param user
-   */
-  mapProfile(user: User): UserProfile {
-    const userProfile: UserProfile = {
-      [securityId]: '' + user.id,
-      profile: {
-        ...user,
-      },
-    };
-    return userProfile;
   }
 }

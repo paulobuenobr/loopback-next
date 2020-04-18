@@ -6,12 +6,13 @@
 import {AuthenticationStrategy, asAuthStrategy} from '@loopback/authentication';
 import {StrategyAdapter} from '@loopback/authentication-passport';
 import {Request, RedirectRoute} from '@loopback/rest';
-import {UserProfile, securityId} from '@loopback/security';
+import {UserProfile} from '@loopback/security';
 import {User} from '../models';
 import {bind} from '@loopback/context';
 import {BasicStrategy as Strategy} from 'passport-http';
 import {repository} from '@loopback/repository';
 import {UserRepository} from '../repositories';
+import {mapProfile} from './types';
 
 /**
  * basic passport strategy
@@ -36,7 +37,7 @@ export class BasicStrategy implements AuthenticationStrategy {
     this.strategy = new StrategyAdapter(
       this.passportstrategy,
       this.name,
-      this.mapProfile.bind(this),
+      mapProfile.bind(this),
     );
   }
 
@@ -103,27 +104,12 @@ export class BasicStrategy implements AuthenticationStrategy {
         // Authentication passed, return user profile
         done(null, user);
       })
-      .catch((err) => {
+      .catch(err => {
         /**
          * Error occurred in authenticating process.
          * Does not necessarily mean an unauthorized user.
          */
         done(err);
       });
-  }
-
-  /**
-   * maps returned User model from verify function to UserProfile
-   *
-   * @param user
-   */
-  mapProfile(user: User): UserProfile {
-    const userProfile: UserProfile = {
-      [securityId]: '' + user.id,
-      profile: {
-        ...user,
-      },
-    };
-    return userProfile;
   }
 }

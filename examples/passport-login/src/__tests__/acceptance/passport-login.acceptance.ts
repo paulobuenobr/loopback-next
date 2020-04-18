@@ -298,7 +298,7 @@ describe('example-passport-login acceptance test', () => {
 
         it('call is redirected to third party authorization url', async () => {
           const response = await client
-            .get('/api/auth/thirdparty/oauth2')
+            .get('/api/auth/thirdparty/facebook')
             .expect(303);
           oauthProviderUrl = response.get('Location');
           expect(url.parse(oauthProviderUrl).pathname).to.equal(
@@ -343,7 +343,7 @@ describe('example-passport-login acceptance test', () => {
             .expect(302);
           callbackToLbApp = response.get('Location');
           expect(url.parse(callbackToLbApp).pathname).to.equal(
-            '/api/auth/thirdparty/oauth2/callback',
+            '/api/auth/thirdparty/facebook/callback',
           );
         });
 

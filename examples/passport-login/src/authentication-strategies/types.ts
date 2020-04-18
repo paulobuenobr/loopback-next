@@ -7,6 +7,7 @@ import axios from 'axios';
 import {Profile} from 'passport';
 import {UserIdentityService} from '@loopback/authentication';
 import {User} from '../models';
+import {UserProfile, securityId} from '@loopback/security';
 
 export type profileFunction = (
   accessToken: string,
@@ -35,15 +36,15 @@ export const oauth2ProfileFunction: profileFunction = (
     .get('http://localhost:9000/verify?access_token=' + accessToken, {
       headers: {Authorization: accessToken},
     })
-    .then((response) => {
+    .then(response => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const profile: any = response.data;
       profile.id = profile.userId;
-      profile.emails = [profile.email];
+      profile.emails = [{value: profile.email}];
       profile.provider = 'custom-oauth2';
       done(null, profile);
     })
-    .catch((err) => {
+    .catch(err => {
       done(err);
     });
 };
@@ -75,4 +76,18 @@ export const verifyFunctionFactory = function (
         done(err);
       });
   };
+};
+
+/**
+ * map passport profile to UserProfile in `@loopback/security`
+ * @param user
+ */
+export const mapProfile = function (user: User): UserProfile {
+  const userProfile: UserProfile = {
+    [securityId]: '' + user.id,
+    profile: {
+      ...user,
+    },
+  };
+  return userProfile;
 };

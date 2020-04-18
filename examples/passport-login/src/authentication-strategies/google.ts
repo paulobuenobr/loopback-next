@@ -14,11 +14,11 @@ import {Strategy, StrategyOptions} from 'passport-google-oauth2';
 import {bind, inject} from '@loopback/context';
 import {UserServiceBindings} from '../services';
 import {extensionFor} from '@loopback/core';
-import {securityId, UserProfile} from '@loopback/security';
+import {UserProfile} from '@loopback/security';
 import {User} from '../models';
 import {Request, RedirectRoute} from '@loopback/rest';
 import {PassportAuthenticationBindings} from './types';
-import {verifyFunctionFactory} from './types';
+import {verifyFunctionFactory, mapProfile} from './types';
 
 @bind(
   asAuthStrategy,
@@ -45,7 +45,7 @@ export class GoogleOauth2Authorization implements AuthenticationStrategy {
     this.strategy = new StrategyAdapter(
       this.passportstrategy,
       this.name,
-      this.mapProfile.bind(this),
+      mapProfile.bind(this),
     );
   }
 
@@ -55,19 +55,5 @@ export class GoogleOauth2Authorization implements AuthenticationStrategy {
    */
   async authenticate(request: Request): Promise<UserProfile | RedirectRoute> {
     return this.strategy.authenticate(request);
-  }
-
-  /**
-   * map passport profile to user profile
-   * @param user
-   */
-  mapProfile(user: User): UserProfile {
-    const userProfile: UserProfile = {
-      [securityId]: '' + user.id,
-      profile: {
-        ...user,
-      },
-    };
-    return userProfile;
   }
 }

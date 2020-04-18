@@ -136,7 +136,7 @@ app.get('/signup', function (req, res, next) {
 app.post('/users/signup', urlencodedParser, function (req, res, next) {
   req.url = '/api/signup';
   req.headers['accept'] = 'text/json';
-  res.on('User Exists', (msg) => {
+  res.on('User Exists', msg => {
     res.status(401);
     /**
      * Sign Up events (like 'User Exists') are captured and redirected to the login page with error message.
@@ -154,7 +154,7 @@ app.post('/users/signup', urlencodedParser, function (req, res, next) {
 app.post('/login_submit', urlencodedParser, function (req, res, next) {
   req.url = '/api/login';
   req.headers['accept'] = 'text/json';
-  res.on('UnauthorizedError', (msg) => {
+  res.on('UnauthorizedError', msg => {
     res.status(401);
     /**
      * authentication failures are captured and redirected to the login page with error message.
