@@ -93,7 +93,7 @@ Express middleware can now be plugged into LoopBack as follows:
 
 - As a `Middleware` to be executed by `InvokeMiddleware` actions within the
   sequence. Middleware are registered by extension points to form chains
-  (`MiddlewareChain').
+  (`MiddlewareChain`).
 
 - As a global or local interceptor for method invocations.
 
